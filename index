@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tuckman Team Working Questionnaire</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --accent: #111827;
+      --soft: #eef2f7;
+      --forming: #2563eb;
+      --storming: #dc2626;
+      --norming: #eab308;
+      --performing: #16a34a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 24px rgba(17, 24, 39, 0.06);
+    }
+
+    h1, h2, h3 { margin-top: 0; }
+
+    .muted { color: var(--muted); }
+
+    label {
+      font-weight: 700;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+
+    .question {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+
+    .question p {
+      margin-top: 0;
+      font-weight: 600;
+    }
+
+    .scale {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .scale label {
+      font-weight: 400;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    button {
+      border: 0;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      margin-right: 8px;
+    }
+
+    button.secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .error {
+      color: #b91c1c;
+      font-weight: 700;
+      display: none;
+      margin-top: 10px;
+    }
+
+    .results {
+      display: none;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .score-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fff;
+      text-align: center;
+    }
+
+    .score-box h3 {
+      margin-bottom: 6px;
+    }
+
+    .score {
+      font-size: 2rem;
+      font-weight: 800;
+    }
+
+    .chart {
+      margin-top: 20px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 50px;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .bar-bg {
+      height: 22px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      border-radius: 999px;
+    }
+
+    .forming { background: var(--forming); }
+    .storming { background: var(--storming); }
+    .norming { background: var(--norming); }
+    .performing { background: var(--performing); }
+
+    .stage-description {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 12px;
+      background: var(--soft);
+      border: 1px solid var(--border);
+    }
+
+    .footnote {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-top: 14px;
+    }
+
+    @media (max-width: 800px) {
+      .score-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bar-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      button, .questions, .instructions {
+        display: none;
+      }
+
+      body {
+        background: #fff;
+      }
+
+      .card {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card instructions">
+      <h1>Tuckman Team Working Questionnaire</h1>
+      <p>This questionnaire helps assess the stage your team is currently operating in: Forming, Storming, Norming, or Performing.</p>
+
+      <label for="teamName">Team name</label>
+      <input id="teamName" type="text" placeholder="Enter team name" />
+
+      <p><strong>Instructions:</strong> For each statement, rate how rarely or often your team displays the behavior.</p>
+      <p class="muted">1 = almost never, 2 = seldom, 3 = occasionally, 4 = frequently, 5 = almost always</p>
+    </div>
+
+    <div id="questions" class="questions"></div>
+
+    <div class="card">
+      <button onclick="calculateResults()">Calculate Results</button>
+      <button class="secondary" onclick="resetForm()">Reset</button>
+      <button class="secondary" onclick="window.print()">Print / Save as PDF</button>
+      <p id="error" class="error">Please answer all 32 statements before calculating results.</p>
+    </div>
+
+    <div id="results" class="card results">
+      <h2 id="resultsTitle">Your Team Results</h2>
+      <div class="score-grid">
+        <div class="score-box">
+          <h3>Forming</h3>
+          <div id="formingScore" class="score">0</div>
+        </div>
+        <div class="score-box">
+          <h3>Storming</h3>
+          <div id="stormingScore" class="score">0</div>
+        </div>
+        <div class="score-box">
+          <h3>Norming</h3>
+          <div id="normingScore" class="score">0</div>
+        </div>
+        <div class="score-box">
+          <h3>Performing</h3>
+          <div id="performingScore" class="score">0</div>
+        </div>
+      </div>
+
+      <div class="chart">
+        <div class="bar-row">
+          <strong>Forming</strong>
+          <div class="bar-bg"><div id="formingBar" class="bar forming"></div></div>
+          <span id="formingLabel">0</span>
+        </div>
+        <div class="bar-row">
+          <strong>Storming</strong>
+          <div class="bar-bg"><div id="stormingBar" class="bar storming"></div></div>
+          <span id="stormingLabel">0</span>
+        </div>
+        <div class="bar-row">
+          <strong>Norming</strong>
+          <div class="bar-bg"><div id="normingBar" class="bar norming"></div></div>
+          <span id="normingLabel">0</span>
+        </div>
+        <div class="bar-row">
+          <strong>Performing</strong>
+          <div class="bar-bg"><div id="performingBar" class="bar performing"></div></div>
+          <span id="performingLabel">0</span>
+        </div>
+      </div>
+
+      <div id="interpretation" class="stage-description"></div>
+
+      <p class="footnote">
+        This assessment is for reflection and team discussion. It should not be used as a formal diagnostic instrument.
+        <br><br>
+        Assessment provided by <strong>crisbravo.com</strong>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      "We try to have set procedures to ensure that things are orderly and run smoothly.",
+      "We are quick to get on with the task in hand and do not spend too much time on the planning stage.",
+      "Team feels that we’re all in it together and shares responsibility for the team’s success or failure.",
+      "We have thorough procedures for agreeing objectives and planning the way we will perform tasks.",
+      "Team members are afraid or don’t like to ask others for help.",
+      "We take our team’s goals and objectives literally and assume a shared understanding.",
+      "The team leader tries to keep order and contributes to the task in hand.",
+      "We do not have fixed procedures; we make them up as the task or project progresses.",
+      "We generate lots of ideas, but end up not using many because we fail to listen to them or reject them without fully understanding them.",
+      "Team members do not fully trust the other members and closely monitor others who are working on a specific task.",
+      "The team leader ensures that we follow the procedures, do not argue, do not interrupt, and keep to the point.",
+      "We enjoy working together; we have a full and productive time.",
+      "We have accepted each other as members of the team.",
+      "The team leader is democratic and collaborative.",
+      "We are constantly trying to define the goal and what tasks need to be accomplished.",
+      "Many of the team members have their own ideas about the process and personal agendas are rampant.",
+      "We fully accept each other’s strengths and weaknesses.",
+      "We assign specific roles to team members when we are all together.",
+      "We try to achieve harmony by avoiding conflict.",
+      "The things we are doing are very different from what we imagined and seem quite difficult to accomplish.",
+      "There are many abstract discussions of the concepts and issues, and some members are impatient with these discussions.",
+      "We are able to work through group problems.",
+      "We argue a lot, even if we agree on the real issues.",
+      "The team is often tempted to go above the original scope of the project or objective.",
+      "We express criticism of others’ constructed play.",
+      "There is a close attachment to the team.",
+      "It feels that we are all working hard, yet little is being accomplished towards our objective.",
+      "The goals we have established seem unrealistic now.",
+      "Although we are not fully sure of our goals and issues, we are excited and proud to be on the team.",
+      "We often share personal problems with each other.",
+      "There is a lot of resisting the tasks in hand.",
+      "We get a lot of work done."
+    ];
+
+    const scoring = {
+      forming: [1, 5, 10, 15, 18, 21, 27, 29],
+      storming: [2, 7, 9, 16, 20, 23, 28, 31],
+      norming: [4, 6, 11, 13, 19, 24, 25, 30],
+      performing: [3, 8, 12, 14, 17, 22, 26, 32]
+    };
+
+    const descriptions = {
+      forming: {
+        title: "Forming",
+        text: "Your team may still be clarifying its purpose, roles, responsibilities, and ways of working. At this stage, members often depend heavily on the leader for direction and structure."
+      },
+      storming: {
+        title: "Storming",
+        text: "Your team may be experiencing tension, disagreement, competing agendas, or uncertainty about goals and roles. This stage requires focus, clarification, and constructive conflict management."
+      },
+      norming: {
+        title: "Norming",
+        text: "Your team appears to be building agreement, trust, shared expectations, and clearer roles. Members are more likely to cooperate, support each other, and develop useful working routines."
+      },
+      performing: {
+        title: "Performing",
+        text: "Your team appears to be functioning with autonomy, clarity, shared commitment, and productive collaboration. Members can focus on results while also managing relationships and processes effectively."
+      }
+    };
+
+    function buildQuestions() {
+      const container = document.getElementById("questions");
+      container.innerHTML = "";
+
+      questions.forEach((question, index) => {
+        const div = document.createElement("div");
+        div.className = "question card";
+
+        let scaleHtml = "";
+        for (let i = 1; i <= 5; i++) {
+          scaleHtml += `
+            <label>
+              <input type="radio" name="q${index + 1}" value="${i}">
+              ${i}
+            </label>
+          `;
+        }
+
+        div.innerHTML = `
+          <p>${index + 1}. ${question}</p>
+          <div class="scale">${scaleHtml}</div>
+        `;
+
+        container.appendChild(div);
+      });
+    }
+
+    function getAnswer(questionNumber) {
+      const selected = document.querySelector(`input[name="q${questionNumber}"]:checked`);
+      return selected ? Number(selected.value) : null;
+    }
+
+    function calculateStageScore(items) {
+      return items.reduce((total, questionNumber) => total + getAnswer(questionNumber), 0);
+    }
+
+    function calculateResults() {
+      for (let i = 1; i <= 32; i++) {
+        if (getAnswer(i) === null) {
+          document.getElementById("error").style.display = "block";
+          document.getElementById("results").style.display = "none";
+          return;
+        }
+      }
+
+      document.getElementById("error").style.display = "none";
+
+      const scores = {
+        forming: calculateStageScore(scoring.forming),
+        storming: calculateStageScore(scoring.storming),
+        norming: calculateStageScore(scoring.norming),
+        performing: calculateStageScore(scoring.performing)
+      };
+
+      document.getElementById("formingScore").textContent = scores.forming;
+      document.getElementById("stormingScore").textContent = scores.storming;
+      document.getElementById("normingScore").textContent = scores.norming;
+      document.getElementById("performingScore").textContent = scores.performing;
+
+      updateBar("forming", scores.forming);
+      updateBar("storming", scores.storming);
+      updateBar("norming", scores.norming);
+      updateBar("performing", scores.performing);
+
+      const highestStage = Object.keys(scores).sort((a, b) => scores[b] - scores[a])[0];
+      const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+
+      let transitionNote = "";
+      if (sortedScores[0][1] - sortedScores[1][1] <= 3) {
+        transitionNote = "<p><strong>Note:</strong> Your two highest scores are close. This may suggest that the team is moving through a transition phase between stages.</p>";
+      }
+
+      if (sortedScores[0][1] - sortedScores[3][1] <= 5) {
+        transitionNote = "<p><strong>Note:</strong> The scores are close across several stages. This may suggest that the team’s functioning is variable or that there is no clear shared perception of the team’s current stage.</p>";
+      }
+
+      const teamName = document.getElementById("teamName").value.trim();
+      document.getElementById("resultsTitle").textContent = teamName
+        ? teamName + " — Tuckman Team Results"
+        : "Your Team Results";
+
+      document.getElementById("interpretation").innerHTML = `
+        <h3>Primary Stage: ${descriptions[highestStage].title}</h3>
+        <p>${descriptions[highestStage].text}</p>
+        ${transitionNote}
+      `;
+
+      document.getElementById("results").style.display = "block";
+      document.getElementById("results").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function updateBar(stage, score) {
+      const percentage = (score / 40) * 100;
+      document.getElementById(stage + "Bar").style.width = percentage + "%";
+      document.getElementById(stage + "Label").textContent = score;
+    }
+
+    function resetForm() {
+      document.querySelectorAll("input[type='radio']").forEach(input => input.checked = false);
+      document.getElementById("teamName").value = "";
+      document.getElementById("results").style.display = "none";
+      document.getElementById("error").style.display = "none";
+      window.scrollTo(0, 0);
+    }
+
+    buildQuestions();
+  </script>
+</body>
+</html>
