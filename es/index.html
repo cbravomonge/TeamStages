@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cuestionario Tuckman de Trabajo en Equipo</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --accent: #111827;
+      --soft: #eef2f7;
+      --forming: #2563eb;
+      --storming: #dc2626;
+      --norming: #eab308;
+      --performing: #16a34a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 24px rgba(17, 24, 39, 0.06);
+    }
+
+    h1, h2, h3 { margin-top: 0; }
+
+    .muted { color: var(--muted); }
+
+    label {
+      font-weight: 700;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+
+    .question {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+
+    .question p {
+      margin-top: 0;
+      font-weight: 600;
+    }
+
+    .scale {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .scale label {
+      font-weight: 400;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    button {
+      border: 0;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      margin-right: 8px;
+    }
+
+    button.secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .error {
+      color: #b91c1c;
+      font-weight: 700;
+      display: none;
+      margin-top: 10px;
+    }
+
+    .results { display: none; }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .score-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fff;
+      text-align: center;
+    }
+
+    .score {
+      font-size: 2rem;
+      font-weight: 800;
+    }
+
+    .chart { margin-top: 20px; }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 50px;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .bar-bg {
+      height: 22px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      border-radius: 999px;
+    }
+
+    .forming { background: var(--forming); }
+    .storming { background: var(--storming); }
+    .norming { background: var(--norming); }
+    .performing { background: var(--performing); }
+
+    .stage-description {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 12px;
+      background: var(--soft);
+      border: 1px solid var(--border);
+    }
+
+    .footnote {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-top: 14px;
+    }
+
+    @media (max-width: 800px) {
+      .score-grid { grid-template-columns: 1fr; }
+      .bar-row { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      button, .questions, .instructions { display: none; }
+      body { background: #fff; }
+      .card { box-shadow: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="card instructions">
+      <h1>Cuestionario Tuckman de Trabajo en Equipo</h1>
+      <p>Este cuestionario ayuda a identificar en qué etapa se encuentra tu equipo: Formación, Conflicto, Normalización o Desempeño.</p>
+
+      <label for="teamName">Nombre del equipo</label>
+      <input id="teamName" type="text" placeholder="Escribe el nombre del equipo" />
+
+      <p><strong>Instrucciones:</strong> Para cada afirmación, indica con qué frecuencia tu equipo muestra ese comportamiento.</p>
+      <p class="muted">1 = casi nunca, 2 = rara vez, 3 = ocasionalmente, 4 = frecuentemente, 5 = casi siempre</p>
+    </div>
+
+    <div id="questions" class="questions"></div>
+
+    <div class="card">
+      <button onclick="calculateResults()">Calcular resultados</button>
+      <button class="secondary" onclick="resetForm()">Reiniciar</button>
+      <button class="secondary" onclick="window.print()">Imprimir / Guardar como PDF</button>
+      <p id="error" class="error">Responde las 32 afirmaciones antes de calcular los resultados.</p>
+    </div>
+
+    <div id="results" class="card results">
+      <h2 id="resultsTitle">Resultados del equipo</h2>
+
+      <div class="score-grid">
+        <div class="score-box">
+          <h3>Formación</h3>
+          <div id="formingScore" class="score">0</div>
+        </div>
+        <div class="score-box">
+          <h3>Conflicto</h3>
+          <div id="stormingScore" class="score">0</div>
+        </div>
+        <div class="score-box">
+          <h3>Normalización</h3>
+          <div id="normingScore" class="score">0</div>
+        </div>
+        <div class="score-box">
+          <h3>Desempeño</h3>
+          <div id="performingScore" class="score">0</div>
+        </div>
+      </div>
+
+      <div class="chart">
+        <div class="bar-row">
+          <strong>Formación</strong>
+          <div class="bar-bg"><div id="formingBar" class="bar forming"></div></div>
+          <span id="formingLabel">0</span>
+        </div>
+        <div class="bar-row">
+          <strong>Conflicto</strong>
+          <div class="bar-bg"><div id="stormingBar" class="bar storming"></div></div>
+          <span id="stormingLabel">0</span>
+        </div>
+        <div class="bar-row">
+          <strong>Normalización</strong>
+          <div class="bar-bg"><div id="normingBar" class="bar norming"></div></div>
+          <span id="normingLabel">0</span>
+        </div>
+        <div class="bar-row">
+          <strong>Desempeño</strong>
+          <div class="bar-bg"><div id="performingBar" class="bar performing"></div></div>
+          <span id="performingLabel">0</span>
+        </div>
+      </div>
+
+      <div id="interpretation" class="stage-description"></div>
+
+      <p class="footnote">
+        Esta evaluación es para reflexión y conversación en equipo. No debe usarse como instrumento diagnóstico formal.
+        <br><br>
+        Evaluación proporcionada por <strong>crisbravo.com</strong>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      "Tratamos de tener procedimientos establecidos para asegurar que las cosas estén ordenadas y funcionen sin problemas.",
+      "Pasamos rápidamente a la tarea en cuestión y no dedicamos demasiado tiempo a la etapa de planificación.",
+      "El equipo siente que estamos todos juntos en esto y comparte la responsabilidad por el éxito o fracaso del equipo.",
+      "Tenemos procedimientos claros para acordar objetivos y planificar cómo realizaremos las tareas.",
+      "Los miembros del equipo tienen miedo o no les gusta pedir ayuda a los demás.",
+      "Tomamos las metas y objetivos del equipo de manera literal y asumimos que todos los entendemos igual.",
+      "El líder del equipo trata de mantener el orden y contribuye a la tarea en cuestión.",
+      "No tenemos procedimientos fijos; los vamos creando conforme avanza la tarea o el proyecto.",
+      "Generamos muchas ideas, pero terminamos usando pocas porque no las escuchamos o las rechazamos sin entenderlas completamente.",
+      "Los miembros del equipo no confían plenamente en los demás y monitorean de cerca a quienes trabajan en una tarea específica.",
+      "El líder del equipo se asegura de que sigamos los procedimientos, no discutamos, no interrumpamos y nos mantengamos enfocados.",
+      "Disfrutamos trabajar juntos; tenemos un tiempo productivo y completo.",
+      "Nos hemos aceptado mutuamente como miembros del equipo.",
+      "El líder del equipo es democrático y colaborativo.",
+      "Estamos constantemente tratando de definir la meta y las tareas que deben realizarse.",
+      "Muchos miembros del equipo tienen sus propias ideas sobre el proceso y abundan las agendas personales.",
+      "Aceptamos plenamente las fortalezas y debilidades de los demás.",
+      "Asignamos roles específicos a los miembros del equipo cuando estamos todos juntos.",
+      "Tratamos de lograr armonía evitando el conflicto.",
+      "Las cosas que estamos haciendo son muy diferentes de lo que imaginábamos y parecen difíciles de lograr.",
+      "Hay muchas discusiones abstractas sobre conceptos y temas, y algunos miembros se impacientan con esas discusiones.",
+      "Somos capaces de trabajar los problemas del grupo.",
+      "Discutimos mucho, incluso cuando estamos de acuerdo en los temas reales.",
+      "El equipo suele sentirse tentado a ir más allá del alcance original del proyecto u objetivo.",
+      "Expresamos críticas sobre el trabajo construido por otros.",
+      "Existe un fuerte apego al equipo.",
+      "Se siente que todos estamos trabajando duro, pero que se logra poco hacia nuestro objetivo.",
+      "Las metas que establecimos ahora parecen poco realistas.",
+      "Aunque no estamos completamente seguros de nuestras metas y asuntos, estamos emocionados y orgullosos de estar en el equipo.",
+      "A menudo compartimos problemas personales entre nosotros.",
+      "Hay mucha resistencia frente a las tareas en cuestión.",
+      "Logramos hacer mucho trabajo."
+    ];
+
+    const scoring = {
+      forming: [1, 5, 10, 15, 18, 21, 27, 29],
+      storming: [2, 7, 9, 16, 20, 23, 28, 31],
+      norming: [4, 6, 11, 13, 19, 24, 25, 30],
+      performing: [3, 8, 12, 14, 17, 22, 26, 32]
+    };
+
+    const descriptions = {
+      forming: {
+        title: "Formación",
+        text: "El equipo todavía puede estar clarificando su propósito, roles, responsabilidades y formas de trabajo. En esta etapa suele haber alta dependencia del líder para recibir dirección, estructura y orientación."
+      },
+      storming: {
+        title: "Conflicto",
+        text: "El equipo puede estar experimentando tensión, desacuerdos, agendas personales o incertidumbre sobre metas y roles. Esta etapa requiere clarificación, foco y manejo constructivo del conflicto."
+      },
+      norming: {
+        title: "Normalización",
+        text: "El equipo parece estar construyendo acuerdos, confianza, expectativas compartidas y roles más claros. Los miembros tienden a cooperar más, apoyarse entre sí y desarrollar rutinas de trabajo útiles."
+      },
+      performing: {
+        title: "Desempeño",
+        text: "El equipo parece funcionar con autonomía, claridad, compromiso compartido y colaboración productiva. Los miembros pueden enfocarse en resultados mientras gestionan relaciones, procesos y desacuerdos de forma efectiva."
+      }
+    };
+
+    function buildQuestions() {
+      const container = document.getElementById("questions");
+      container.innerHTML = "";
+
+      questions.forEach((question, index) => {
+        const div = document.createElement("div");
+        div.className = "question card";
+
+        let scaleHtml = "";
+        for (let i = 1; i <= 5; i++) {
+          scaleHtml += `
+            <label>
+              <input type="radio" name="q${index + 1}" value="${i}">
+              ${i}
+            </label>
+          `;
+        }
+
+        div.innerHTML = `
+          <p>${index + 1}. ${question}</p>
+          <div class="scale">${scaleHtml}</div>
+        `;
+
+        container.appendChild(div);
+      });
+    }
+
+    function getAnswer(questionNumber) {
+      const selected = document.querySelector(`input[name="q${questionNumber}"]:checked`);
+      return selected ? Number(selected.value) : null;
+    }
+
+    function calculateStageScore(items) {
+      return items.reduce((total, questionNumber) => total + getAnswer(questionNumber), 0);
+    }
+
+    function calculateResults() {
+      for (let i = 1; i <= 32; i++) {
+        if (getAnswer(i) === null) {
+          document.getElementById("error").style.display = "block";
+          document.getElementById("results").style.display = "none";
+          return;
+        }
+      }
+
+      document.getElementById("error").style.display = "none";
+
+      const scores = {
+        forming: calculateStageScore(scoring.forming),
+        storming: calculateStageScore(scoring.storming),
+        norming: calculateStageScore(scoring.norming),
+        performing: calculateStageScore(scoring.performing)
+      };
+
+      document.getElementById("formingScore").textContent = scores.forming;
+      document.getElementById("stormingScore").textContent = scores.storming;
+      document.getElementById("normingScore").textContent = scores.norming;
+      document.getElementById("performingScore").textContent = scores.performing;
+
+      updateBar("forming", scores.forming);
+      updateBar("storming", scores.storming);
+      updateBar("norming", scores.norming);
+      updateBar("performing", scores.performing);
+
+      const highestStage = Object.keys(scores).sort((a, b) => scores[b] - scores[a])[0];
+      const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+
+      let transitionNote = "";
+      if (sortedScores[0][1] - sortedScores[1][1] <= 3) {
+        transitionNote = "<p><strong>Nota:</strong> Tus dos puntajes más altos están muy cerca. Esto puede indicar que el equipo está atravesando una fase de transición entre etapas.</p>";
+      }
+
+      if (sortedScores[0][1] - sortedScores[3][1] <= 5) {
+        transitionNote = "<p><strong>Nota:</strong> Los puntajes están cerca en varias etapas. Esto puede indicar que el funcionamiento del equipo es variable o que no hay una percepción clara de la etapa actual del equipo.</p>";
+      }
+
+      const teamName = document.getElementById("teamName").value.trim();
+      document.getElementById("resultsTitle").textContent = teamName
+        ? teamName + " — Resultados Tuckman"
+        : "Resultados del equipo";
+
+      document.getElementById("interpretation").innerHTML = `
+        <h3>Etapa principal: ${descriptions[highestStage].title}</h3>
+        <p>${descriptions[highestStage].text}</p>
+        ${transitionNote}
+      `;
+
+      document.getElementById("results").style.display = "block";
+      document.getElementById("results").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function updateBar(stage, score) {
+      const percentage = (score / 40) * 100;
+      document.getElementById(stage + "Bar").style.width = percentage + "%";
+      document.getElementById(stage + "Label").textContent = score;
+    }
+
+    function resetForm() {
+      document.querySelectorAll("input[type='radio']").forEach(input => input.checked = false);
+      document.getElementById("teamName").value = "";
+      document.getElementById("results").style.display = "none";
+      document.getElementById("error").style.display = "none";
+      window.scrollTo(0, 0);
+    }
+
+    buildQuestions();
+  </script>
+</body>
+</html>
